@@ -1,0 +1,27 @@
+{
+  "name": "kyrsa4",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "tsc && node bin/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "latest",
+    "express-session": "latest",
+    "fs-extra": "latest",
+    "lodash": "^4.17.11",
+    "typescript": "^3.5.0-dev.20190418"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.118",
+    "@types/fs-extra": "latest",
+    "@types/node": "latest",
+    "@types/node-fetch": "latest",
+    "tslint": "latest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

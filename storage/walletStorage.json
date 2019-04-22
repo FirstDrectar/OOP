@@ -1,0 +1,14 @@
+[
+   {
+      "_ownerName": "qwe",
+      "_currency": "USD",
+      "_cardNumber": "1111222233334144",
+      "_sum": 100
+   },
+   {
+      "_ownerName": "qasd",
+      "_currency": "RUR",
+      "_cardNumber": "1111222233334244",
+      "_sum": 100
+   }
+]
