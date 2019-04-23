@@ -1,4 +1,8 @@
 import * as fs from "fs";
+import * as  util from 'util';
+import { plainToClass } from 'class-transformer';
+
+
 const PATH = './storage/walletStorage.json';
 export enum Currency {
     UAH = "UAH",
@@ -19,20 +23,28 @@ export class WalletStorage {
         return this.hash.get(cardNumber).Clone();
     }
     async fillAppStorage() {
-        let c = await fs.readFile(PATH, (err, data) => {
-            if (err) throw new Error(`Incorrect path ${PATH}`);
-            const st: WalletPrototype[] = JSON.parse(data.toString());
-            return Promise.resolve(st);
-        });
+        const readFile = util.promisify(fs.readFile)
+        try {
+            let data = await readFile(PATH);
+            const storage = JSON.parse(data.toString());
+            console.log(storage);
+            this.hash.clear();
 
-        console.log(this.hash);
-        this.hash.clear();
-        console.log(this.hash);
-        // storage.forEach((value) => {
-            this.pushPrototype(value);
-            console.log(value);
-        });
-        console.log(this.hash);
+            storage.forEach((value) => {
+                let n;
+                switch (value._currency) {
+                    case Currency.USD: n = new USDWallet(value._ownerName); n.cardNumber = value._cardNumber; n.sum = value._sum; this.pushPrototype(n); break;
+                    case Currency.UAH: n = new UAHWallet(value._ownerName); n.cardNumber = value._cardNumber; n.sum = value._sum; this.pushPrototype(n); break;
+                    case Currency.RUR: n = new RURWallet(value._ownerName); n.cardNumber = value._cardNumber; n.sum = value._sum; this.pushPrototype(n); break;
+                    case Currency.EUR: n = new EURWallet(value._ownerName); n.cardNumber = value._cardNumber; n.sum = value._sum; this.pushPrototype(n); break;
+                    default: console.log("Error");
+                }
+            });
+            console.log(this.hash);
+        }
+        catch (err) {
+            console.log(err.message);
+        }
     }
     reloadStorage() {
         let walletArray = new Array<WalletPrototype>();
@@ -44,8 +56,9 @@ export class WalletStorage {
             console.log('The file has been saved!');
         });
     }
+
 }
-export abstract class WalletPrototype {
+export class WalletPrototype {
     protected _ownerName: string;
     protected _cardNumber: string;
     protected _sum: number;
@@ -54,15 +67,23 @@ export abstract class WalletPrototype {
         return this._cardNumber;
     }
     set cardNumber(number: string) {
-        if (number.length != 16 || !Array(number).every((numb) => typeof numb === `number`))
+        if (number.length != 16 || Array(number).every(value => isNaN(parseInt(value)))) {
+            this._cardNumber = "Error bratka";
             return;
+        }
         this._cardNumber = number;
+    }
+    get ownerName(): string {
+        return this._ownerName;
+    }
+    set ownerName(name: string) {
+        this._ownerName = name;
     }
     get sum(): number {
         return this._sum;
     }
     set sum(sum: number) {
-        this.sum = sum;
+        this._sum = sum;
     }
     get currency(): Currency {
         return this._currency;
@@ -75,54 +96,48 @@ export abstract class WalletPrototype {
         return Object.assign({}, this);
 
     }
-    abstract toStr(): string;
+    toStr(): string {
+        return `Wallet number ${this._cardNumber} | Currency ${this._currency} | Sum ${this._sum} | owner ${this._ownerName}`;
+    }
 
 }
 export class USDWallet extends WalletPrototype {
     constructor(name: string) {
         super();
-        this._ownerName = name;
-        this._currency = Currency.USD;
-        this._cardNumber = "1111222233334144";
-        this._sum = 100;
+        this.ownerName = name;
+        this.currency = Currency.USD;
+        this.cardNumber = "1111222233334144";
+        this.sum = 100;
     }
-    toStr(): string {
-        return `Wallet number ${this._cardNumber} | Currency ${this._currency} | Sum ${this._sum} | owner ${this._ownerName}`;
-    }
+
 }
 export class UAHWallet extends WalletPrototype {
     constructor(name: string) {
         super();
-        this._ownerName = name;
-        this._currency = Currency.UAH;
-        this._cardNumber = "1112222223333444";
-        this._sum = 100;
+        this.ownerName = name;
+        this.currency = Currency.UAH;
+        this.cardNumber = "1112222223333444";
+        this.sum = 100;
     }
-    toStr(): string {
-        return `Wallet number ${this._cardNumber} | Currency ${this._currency} | Sum ${this._sum} | owner ${this._ownerName}`;
-    }
+
 }
 export class EURWallet extends WalletPrototype {
     constructor(name: string) {
         super();
-        this._ownerName = name;
-        this._currency = Currency.EUR;
-        this._cardNumber = "1111224433334444";
-        this._sum = 100;
+        this.ownerName = name;
+        this.currency = Currency.EUR;
+        this.cardNumber = "1111224433334444";
+        this.sum = 100;
     }
-    toStr(): string {
-        return `Wallet number ${this._cardNumber} | Currency ${this._currency} | Sum ${this._sum} | owner ${this._ownerName}`;
-    }
+
 }
 export class RURWallet extends WalletPrototype {
     constructor(name: string) {
         super();
-        this._ownerName = name;
-        this._currency = Currency.RUR;
-        this._cardNumber = "1111222233334244";
-        this._sum = 100;
+        this.ownerName = name;
+        this.currency = Currency.RUR;
+        this.cardNumber = "1111222233334244";
+        this.sum = 100;
     }
-    toStr(): string {
-        return `Wallet number ${this._cardNumber} | Currency ${this._currency} | Sum ${this._sum} | owner ${this._ownerName}`;
-    }
+
 }
